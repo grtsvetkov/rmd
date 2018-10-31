@@ -4,7 +4,7 @@ set -v
 set -x
 set +e
 
-TMP_DIR=/tmp/<%= appName %>
+TMP_DIR=<%= setupPath %>/<%= appName %>/tmp
 
 BUNDLE_DIR=${TMP_DIR}/bundle
 
