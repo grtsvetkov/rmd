@@ -4,6 +4,11 @@
     "username": "root",
     "password": "rootpassword"
   },
+  /*
+    "sshOptions": {
+    "port": 22300
+  },
+  */
   "appName": "you_app_name",
   "app": ".",
   "setupPath": "/opt",
