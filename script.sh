@@ -4,7 +4,8 @@ set -v
 set -x
 set +e
 
-TMP_DIR=/opt/<%= appName %>/tmp
+TMP_DIR=/tmp/<%= appName %>
+
 BUNDLE_DIR=${TMP_DIR}/bundle
 
 cd ${TMP_DIR}
@@ -13,7 +14,7 @@ tar xvzf bundle.tar.gz > /dev/null
 chmod -R +x *
 chown -R ${USER} ${BUNDLE_DIR}
 
-cd /opt/<%= appName %>/
+cd <%= setupPath %>/<%= appName %>/
 
 forever stopall
 
@@ -23,7 +24,7 @@ fi
 
 sudo mv tmp/bundle app
 
-cd /opt/<%= appName %>/app/programs/server
+cd <%= setupPath %>/<%= appName %>/app/programs/server
 npm install --save
 
 export PORT=80
@@ -34,4 +35,4 @@ export ROOT_URL=http://<%= appName %>
   export <%- key %>=<%- ("" + env[key]).replace(/./ig, '\\$&') %>
 <% } %>
 
-forever start --minUptime 3000 --spinSleepTime 3000 -l /opt/<%= appName %>/log.log -o /opt/<%= appName %>/stdout.log -e /opt/<%= appName %>/error.log -a /opt/<%= appName %>/app/main.js
+forever start --minUptime 3000 --spinSleepTime 3000 -l <%= setupPath %>/<%= appName %>/log.log -o <%= setupPath %>/<%= appName %>/stdout.log -e <%= setupPath %>/<%= appName %>/error.log -a <%= setupPath %>/<%= appName %>/app/main.js

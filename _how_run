@@ -1,0 +1,3 @@
+#from meteor root directory:
+
+node ./_path_to_rmd_/rmd "$@"

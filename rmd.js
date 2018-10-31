@@ -2,78 +2,87 @@
 
 require('colors');
 
-var nodemiral = require('nodemiral'),
+let nodemiral = require('nodemiral'),
     path = require('path'),
     cjson = require('cjson'),
     fs = require('fs'),
     spawn = require('child_process').spawn,
-    archiver = require('archiver'),
-    _ = require('underscore'),
+    archiver = require('archiver')
 
-    isWindows = /^win/.test(process.platform);
+    isWindows = /^win/.test(process.platform),
 
-function tmpDir() {
-    var trailingSlashRe = isWindows ? /[^:]\\$/ : /.\/$/,
-        path;
+    mupErrorLog = (message) => {
+        console.error(('Ошибка в mup.json файле: ' + message + '\n').red.bold);
+        process.exit(1);
+    },
 
-    if (isWindows) {
-        path = process.env.TEMP ||
-            process.env.TMP ||
-            (process.env.SystemRoot || process.env.windir) + '\\temp';
-    } else {
-        path = process.env.TMPDIR ||
-            process.env.TMP ||
-            process.env.TEMP ||
-            '/tmp';
-    }
+    tmpDir = () => {
+        let path = isWindows
+            ? process.env.TEMP || process.env.TMP || (process.env.SystemRoot || process.env.windir) + '\\temp'
+            : process.env.TMPDIR || process.env.TMP || process.env.TEMP || '/tmp';
 
-    if (trailingSlashRe.test(path)) {
-        path = path.slice(0, -1);
-    }
 
-    return path;
-}
+        return (isWindows ? /[^:]\\$/ : /.\/$/).test(path) ? path.slice(0, -1) : path;
+    },
 
-function haveSummaryMapErrors(summaryMap) {
-    return _.some(summaryMap, function (summary) {
-        return summary.error;
-    });
-}
+    rewriteHome = location => isWindows ? location.replace('~', process.env.USERPROFILE) : location.replace('~', process.env.HOME),
 
-function rewriteHome(location) {
-    return isWindows ? location.replace('~', process.env.USERPROFILE) : location.replace('~', process.env.HOME);
-}
+    getCanonicalPath = (location) => {
+        let localDir = path.resolve(__dirname, location);
+        return fs.existsSync(localDir) ? localDir : path.resolve(rewriteHome(location));
+    },
 
-function mupErrorLog(message) {
-    console.error(('Ошибка в mup.json файле: ' + message + '\n').red.bold);
-    process.exit(1);
-}
+    extend = (defaults, options) => {
+        let extended = {};
 
-function getCanonicalPath(location) {
-    var localDir = path.resolve(__dirname, location);
-    return fs.existsSync(localDir) ? localDir : path.resolve(rewriteHome(location));
-}
+        for (let prop in defaults) {
+            if (Object.prototype.hasOwnProperty.call(defaults, prop)) {
+                extended[prop] = defaults[prop];
+            }
+        }
+        for (let prop in options) {
+            if (Object.prototype.hasOwnProperty.call(options, prop)) {
+                extended[prop] = options[prop];
+            }
+        }
+        return extended;
+    },
+
+    once = function(fn, context) {
+        let result;
+
+        return function () {
+            if (fn) {
+                result = fn.apply(context || this, arguments);
+                fn = null;
+            }
+
+            return result;
+        };
+    },
+
+    mupJsonPath = path.resolve('mup.json'),
+    settingsJsonPath = path.resolve('settings.json'),
+
+    buildLocation = path.resolve(tmpDir(), 'meteor_build_' + String(Math.round(10000 - 0.5 + Math.random() * (99999 - 10001)))),
+    bundlePath = path.resolve(buildLocation, 'bundle.tar.gz'),
+    args = [
+        'build', '--directory', buildLocation,
+        '--architecture', 'os.linux.x86_64'
+    ],
+    config = fs.existsSync(mupJsonPath) ? cjson.load(mupJsonPath) : mupErrorLog('сам файл "mup.json" не найден.'),
+    sshAgentExists = false,
+    sshAgent = process.env.SSH_AUTH_SOCK;
+
 
 console.log('------------------------------------------------'.bold.blue);
 console.log('RIM Meteor DEPLOY:'.bold.blue);
 console.log('------------------------------------------------\n'.bold.blue);
 
-var mupJsonPath = path.resolve('mup.json'),
-    settingsJsonPath = path.resolve('settings.json'),
-    buildLocation = path.resolve(tmpDir(), 'meteor_build_' + String(_.random(10000, 99999))),
-    bundlePath = path.resolve(buildLocation, 'bundle.tar.gz'),
-    args = [
-        'build', '--directory', buildLocation,
-        '--architecture', 'os.linux.x86_64'
-    ];
-config = fs.existsSync(mupJsonPath) ? cjson.load(mupJsonPath) : mupErrorLog('сам файл "mup.json" не найден.');
-
-// spawn inherits env vars from process.env, so we can simply set them like this
-process.env.BUILD_LOCATION = buildLocation;
+process.env.BUILD_LOCATION = buildLocation; // spawn inherits env vars from process.env, so we can simply set them like this
 //process.env.TOOL_NODE_FLAGS = "--max-old-space-size=4096"; //HACK FROM FUCKING METEOR DEPLOY
 
 config.env = config.env || {}; //initialize options
-
 config.meteorBinary = (config.meteorBinary) ? getCanonicalPath(config.meteorBinary) : 'meteor';
 
 if (typeof config.appName === 'undefined') {
@@ -83,9 +92,6 @@ if (typeof config.appName === 'undefined') {
 if (!config.server) {
     mupErrorLog('Server information does not exist');
 }
-
-var sshAgentExists = false,
-    sshAgent = process.env.SSH_AUTH_SOCK;
 
 if (sshAgent) {
     sshAgentExists = fs.existsSync(sshAgent);
@@ -122,7 +128,7 @@ if (isWindows) {
     args = ["/c", "meteor"].concat(args);
 }
 
-var meteor = spawn(config.meteorBinary, args, {cwd: rewriteHome(config.app)});
+let meteor = spawn(config.meteorBinary, args, {cwd: rewriteHome(config.app)});
 
 meteor.stdout.pipe(process.stdout, {end: false});
 meteor.stderr.pipe(process.stderr, {end: false});
@@ -134,7 +140,7 @@ meteor.on('close', function (code) {
         process.exit(1);
     }
 
-    var output = fs.createWriteStream(bundlePath),
+    let output = fs.createWriteStream(bundlePath),
 
         archive = archiver('tar', {
             gzip: true,
@@ -145,9 +151,9 @@ meteor.on('close', function (code) {
 
     archive.pipe(output);
 
-    output.once('close', _.once(function () {
+    output.once('close', once(function () {
 
-        var auth = {username: config.server.username};
+        let auth = {username: config.server.username};
 
         if (config.server.pem) {
             auth.pem = fs.readFileSync(path.resolve(config.server.pem), 'utf8');
@@ -155,7 +161,7 @@ meteor.on('close', function (code) {
             auth.password = config.server.password;
         }
 
-        var taskList = nodemiral.taskList('Развертывание приложения "' + config.appName + '"');
+        let taskList = nodemiral.taskList('Развертывание приложения "' + config.appName + '"');
 
         taskList.copy('Загрузка сборки', {
             src: bundlePath,
@@ -166,21 +172,19 @@ meteor.on('close', function (code) {
         taskList.executeScript('Процесс развертывания', {
             script: path.resolve(__dirname, 'script.sh'),
             vars: {
-                env: _.extend({}, config.env, config.server.env) || {},
-                deployCheckWaitTime: config.deployCheckWaitTime || 20,
-                appName: config.appName
+                env: extend(config.env, config.server.env) || {},
+                appName: config.appName,
+                setupPath: config.setupPath || '/opt'
             }
         });
 
         taskList.run(nodemiral.session(config.server.host, auth, {
             ssh: config.server.sshOptions,
             keepAlive: true
-        }), function (summaryMap) {
-            process.exit(haveSummaryMapErrors(summaryMap) ? 1 : 0);
-        });
+        }), summaryMap => process.exit(summaryMap.some(summary => summary.error) ? 1 : 0));
     }));
 
-    archive.once('error', function (err) {
+    archive.once('error', err => {
         console.log('\n=> Архивирование не удалось: ', err.message);
         process.exit(1);
     });

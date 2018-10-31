@@ -1,0 +1,19 @@
+{
+  "server": {
+    "host": "192.168.0.0",
+    "username": "root",
+    "password": "rootpassword"
+  },
+  "appName": "you_app_name",
+  "app": ".",
+  "setupPath": "/opt",
+  "env": {
+    "MONGO_URL": "mongodb://localhost:27017/you_app_name",
+    "ROOT_URL": "http://192.168.0.0",
+    "PORT": 80
+  }
+  /*"ssl": {
+    "pem": "./ssl/ssl.salus.pem",
+    "port": 443
+  },*/
+}
