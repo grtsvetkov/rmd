@@ -163,7 +163,7 @@ meteor.on('close', function (code) {
 
         let taskList = nodemiral.taskList('Развертывание приложения "' + config.appName + '"');
 
-        taskList.copy('Загрузка сборки', {
+        taskList.copy('Загрузка сборки из' + bundlePath, {
             src: bundlePath,
             dest: '/opt/' + config.appName + '/tmp/bundle.tar.gz',
             progressBar: true
@@ -181,7 +181,7 @@ meteor.on('close', function (code) {
         taskList.run(nodemiral.session(config.server.host, auth, {
             ssh: config.server.sshOptions,
             keepAlive: true
-        }), summaryMap => process.exit(summaryMap.some(summary => summary.error) ? 1 : 0));
+        }), summaryMap => process.exit((summaryMap || []).some(summary => summary.error) ? 1 : 0));
     }));
 
     archive.once('error', err => {
