@@ -1,11 +1,25 @@
 {
   "name": "rim-meteor-deployer",
-  "version": "0.1",
+  "title": "Rim Meteor Deployer",
+  "version": "0.1.0",
   "homepage": "https://github.com/grtsvetkov/rmd",
-  "description": "Rim Meteor Deployer",
-  "author": "Tsvetkov Grigory",
-
+  "description": "Rim Meteor Deployer script",
+  "author": {
+    "name": "Tsvetkov Grigory",
+    "email": "gr.tsvetkov@gmail.com",
+    "url": "https://github.com/grtsvetkov/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/grtsvetkov/rmd.git"
+  },
   "main": "rmd.js",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/grtsvetkov/rmd/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
   "dependencies": {
     "archiver": "^2.1.1",
     "cjson": "^0.5.0",
