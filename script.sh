@@ -19,10 +19,12 @@ cd <%= setupPath %>/<%= appName %>/
 forever stopall
 
 if [ -d app ]; then
-  sudo rm -rf app
+  #sudo rm -rf app
+  rm -rf app
 fi
 
-sudo mv tmp/bundle app
+#sudo mv tmp/bundle app
+mv tmp/bundle app
 
 cd <%= setupPath %>/<%= appName %>/app/programs/server
 npm install --save

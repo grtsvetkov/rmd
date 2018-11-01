@@ -9,7 +9,7 @@ let nodemiral = require('nodemiral'),
     spawn = require('child_process').spawn,
     archiver = require('archiver')
 
-    isWindows = /^win/.test(process.platform),
+isWindows = /^win/.test(process.platform),
 
     mupErrorLog = (message) => {
         console.error(('Ошибка в mup.json файле: ' + message + '\n').red.bold);
@@ -48,7 +48,7 @@ let nodemiral = require('nodemiral'),
         return extended;
     },
 
-    once = function(fn, context) {
+    once = function (fn, context) {
         let result;
 
         return function () {
@@ -162,7 +162,7 @@ meteor.on('close', function (code) {
         }
 
         let taskList = nodemiral.taskList('Развертывание приложения "' + config.appName + '"'),
-            dest = (config.setupPath || '/opt/') + config.appName + '/tmp/bundle.tar.gz';
+            dest = (config.setupPath || '/opt') + '/' + config.appName + '/tmp/bundle.tar.gz';
 
 
         taskList.copy('Загрузка сборки из' + bundlePath + ' в ' + dest, {
@@ -183,7 +183,7 @@ meteor.on('close', function (code) {
         taskList.run(nodemiral.session(config.server.host, auth, {
             ssh: config.server.sshOptions,
             keepAlive: true
-        }), summaryMap => process.exit((summaryMap || []).some(summary => summary.error) ? 1 : 0));
+        }), (sumMap) => { return process.exit(0)});
     }));
 
     archive.once('error', err => {
