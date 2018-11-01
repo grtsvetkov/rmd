@@ -161,11 +161,13 @@ meteor.on('close', function (code) {
             auth.password = config.server.password;
         }
 
-        let taskList = nodemiral.taskList('Развертывание приложения "' + config.appName + '"');
+        let taskList = nodemiral.taskList('Развертывание приложения "' + config.appName + '"'),
+            dest = (config.setupPath || '/opt') + config.appName + '/tmp/bundle.tar.gz';
 
-        taskList.copy('Загрузка сборки из' + bundlePath, {
+
+        taskList.copy('Загрузка сборки из' + bundlePath + ' в ' + dest, {
             src: bundlePath,
-            dest: (config.setupPath || '/opt') + config.appName + '/tmp/bundle.tar.gz',
+            dest: dest,
             progressBar: true
         });
 
