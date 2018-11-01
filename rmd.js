@@ -162,7 +162,7 @@ meteor.on('close', function (code) {
         }
 
         let taskList = nodemiral.taskList('Развертывание приложения "' + config.appName + '"'),
-            dest = (config.setupPath || ('/opt/' + config.appName)) + '/tmp/bundle.tar.gz';
+            dest = (config.setupPath || '/opt/') + config.appName + '/tmp/bundle.tar.gz';
 
 
         taskList.copy('Загрузка сборки из' + bundlePath + ' в ' + dest, {
