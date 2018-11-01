@@ -165,7 +165,7 @@ meteor.on('close', function (code) {
 
         taskList.copy('Загрузка сборки из' + bundlePath, {
             src: bundlePath,
-            dest: '/opt/' + config.appName + '/tmp/bundle.tar.gz',
+            dest: (config.setupPath || '/opt') + config.appName + '/tmp/bundle.tar.gz',
             progressBar: true
         });
 
