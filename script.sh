@@ -37,4 +37,4 @@ export ROOT_URL=http://<%= appName %>
   export <%- key %>=<%- ("" + env[key]).replace(/./ig, '\\$&') %>
 <% } %>
 
-forever start --minUptime 3000 --spinSleepTime 3000 -l <%= setupPath %>/<%= appName %>/log.log -o <%= setupPath %>/<%= appName %>/stdout.log -e <%= setupPath %>/<%= appName %>/error.log -a <%= setupPath %>/<%= appName %>/app/main.js
+forever start --minUptime 3000 --spinSleepTime 3000 -l <%= setupPath %>/<%= appName %>/log.log -e <%= setupPath %>/<%= appName %>/error.log -a <%= setupPath %>/<%= appName %>/app/main.js
