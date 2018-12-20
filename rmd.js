@@ -71,12 +71,14 @@ isWindows = /^win/.test(process.platform),
         '--architecture', 'os.linux.x86_64'
     ],
     config = fs.existsSync(mupJsonPath) ? cjson.load(mupJsonPath) : mupErrorLog('сам файл "mup.json" не найден.'),
+    config = config[process.argv[2]] ? config[process.argv[2]] : mupErrorLog('Не указан раздел для mup.json.'),
     sshAgentExists = false,
     sshAgent = process.env.SSH_AUTH_SOCK;
 
 
 console.log('------------------------------------------------'.bold.blue);
-console.log('RIM Meteor DEPLOY:'.bold.blue);
+console.log('RIM Meteor DEPLOY on:'.bold.blue);
+console.log(process.argv[2].bold.blue);
 console.log('------------------------------------------------\n'.bold.blue);
 
 process.env.BUILD_LOCATION = buildLocation; // spawn inherits env vars from process.env, so we can simply set them like this
@@ -88,6 +90,8 @@ config.meteorBinary = (config.meteorBinary) ? getCanonicalPath(config.meteorBina
 if (typeof config.appName === 'undefined') {
     config.appName = 'meteor';
 }
+
+
 
 if (!config.server) {
     mupErrorLog('Server information does not exist');
