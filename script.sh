@@ -27,8 +27,8 @@ fi
 mv tmp/bundle app
 
 cd <%= setupPath %>/<%= appName %>/app/programs/server
-npm install --save
-npm install bcrypt --save
+npm install --save --unsafe-perm
+npm install bcrypt --save --unsafe-perm
 
 
 export PORT=80
